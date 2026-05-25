@@ -2,7 +2,6 @@
 databases:
   - name: photo-album-db
     databaseName: photo_album_db
-    user: postgres
     plan: free
 
 services:
