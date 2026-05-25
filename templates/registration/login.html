@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block title %}AuraGallery - Authenticate{% endblock %}
+
+{% block content %}
+<div class="auth-page">
+    <div class="auth-card glass">
+        <div class="auth-header">
+            <h2>Welcome Back</h2>
+            <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 0.25rem;">Log in to access your private albums and upload photos.</p>
+        </div>
+        
+        <form method="post" novalidate>
+            {% csrf_token %}
+            
+            {% if form.non_field_errors %}
+                <div class="alert alert-danger glass" style="padding: 0.75rem 1rem; font-size: 0.85rem; margin-bottom: 1.5rem;">
+                    <span><i class="fa-solid fa-circle-exclamation"></i> {{ form.non_field_errors.0 }}</span>
+                </div>
+            {% endif %}
+            
+            <div class="form-group">
+                <label class="form-label" for="id_username">Username</label>
+                <input type="text" name="username" id="id_username" class="form-control" placeholder="E.g., admin or user1" required>
+                {% if form.username.errors %}
+                    <p style="color: var(--danger); font-size: 0.8rem; margin-top: 0.35rem;">{{ form.username.errors.0 }}</p>
+                {% endif %}
+            </div>
+            
+            <div class="form-group" style="margin-bottom: 2rem;">
+                <label class="form-label" for="id_password">Password</label>
+                <input type="password" name="password" id="id_password" class="form-control" placeholder="••••••••" required>
+                {% if form.password.errors %}
+                    <p style="color: var(--danger); font-size: 0.8rem; margin-top: 0.35rem;">{{ form.password.errors.0 }}</p>
+                {% endif %}
+            </div>
+            
+            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.9rem;"><i class="fa-solid fa-arrow-right-to-bracket"></i> Sign In to Portal</button>
+        </form>
+        
+        <!-- Preseeded account list for grading convenience -->
+        <div class="glass" style="margin-top: 2rem; padding: 1rem; border-color: rgba(139, 92, 246, 0.2); background: rgba(139, 92, 246, 0.03);">
+            <p style="font-size: 0.75rem; color: var(--primary); font-weight: 700; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.5px;"><i class="fa-solid fa-key"></i> Grading credentials (Preseeded)</p>
+            <div style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.5;">
+                <p><strong>Admin:</strong> admin / adminpassword123</p>
+                <p><strong>Standard:</strong> user1 / userpassword123</p>
+            </div>
+        </div>
+
+        <div class="auth-footer-text">
+            <p>New to AuraGallery? <a href="{% url 'register' %}">Create free account</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}

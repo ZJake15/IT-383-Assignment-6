@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block title %}AuraGallery - Configure Album{% endblock %}
+
+{% block content %}
+<div class="auth-page">
+    <div class="auth-card glass">
+        <div class="auth-header">
+            <h2>{{ title }}</h2>
+            <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 0.25rem;">Define the boundary of your new visual collection.</p>
+        </div>
+        
+        <form method="post" novalidate>
+            {% csrf_token %}
+            
+            {% for field in form %}
+                <div class="form-group">
+                    <label class="form-label" for="{{ field.id_for_label }}">
+                        {{ field.label }}
+                        {% if field.field.required %}<span style="color: var(--primary);">*</span>{% endif %}
+                    </label>
+                    
+                    {% if field.field.widget.input_type == 'checkbox' %}
+                        <div class="checkbox-group">
+                            <input type="checkbox" name="{{ field.name }}" id="{{ field.id_for_label }}" class="checkbox-control" {% if field.value %}checked{% endif %}>
+                            <span style="font-size: 0.85rem; color: var(--text-muted);">Enable this option to restrict access to yourself and album administrators.</span>
+                        </div>
+                    {% elif field.name == 'category' %}
+                        <select name="{{ field.name }}" id="{{ field.id_for_label }}" class="form-control select-input" style="width: 100%;">
+                            {% for val, label in field.field.choices %}
+                                <option value="{{ val }}" {% if field.value == val %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    {% elif field.name == 'description' %}
+                        <textarea name="{{ field.name }}" id="{{ field.id_for_label }}" class="form-control" placeholder="A brief narrative or context for this album...">{{ field.value|default:"" }}</textarea>
+                    {% else %}
+                        <input type="text" name="{{ field.name }}" id="{{ field.id_for_label }}" value="{{ field.value|default:"" }}" class="form-control" placeholder="E.g., Wanderlust Autumn 2026">
+                    {% endif %}
+                    
+                    {% if field.errors %}
+                        <p style="color: var(--danger); font-size: 0.8rem; margin-top: 0.35rem;">
+                            {{ field.errors.0 }}
+                        </p>
+                    {% endif %}
+                </div>
+            {% endfor %}
+            
+            <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                <a href="{% if album %}{% url 'album_detail' album.id %}{% else %}{% url 'album_list' %}{% endif %}" class="btn btn-secondary" style="flex: 1; text-align: center;">Cancel</a>
+                <button type="submit" class="btn btn-primary" style="flex: 2;"><i class="fa-solid fa-square-check"></i> Save Album</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

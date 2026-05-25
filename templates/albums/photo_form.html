@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block title %}AuraGallery - Edit Photo Details{% endblock %}
+
+{% block content %}
+<div class="auth-page">
+    <div class="auth-card glass">
+        <div class="auth-header">
+            <h2>{% if is_edit %}Edit Photo details{% else %}Archive Photo{% endif %}</h2>
+            <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 0.25rem;">Provide metadata, details, and keywords for this asset.</p>
+        </div>
+        
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label class="form-label" for="id_title">Photo Title</label>
+                <input type="text" name="title" id="id_title" value="{{ form.title.value|default:"" }}" class="form-control" placeholder="E.g., Alpine Sunset">
+                {% if form.title.errors %}
+                    <p style="color: var(--danger); font-size: 0.8rem; margin-top: 0.35rem;">{{ form.title.errors.0 }}</p>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="id_description">Photo Description / Narrative</label>
+                <textarea name="description" id="id_description" class="form-control" placeholder="Add rich descriptions, date, or specific configurations...">{{ form.description.value|default:"" }}</textarea>
+                {% if form.description.errors %}
+                    <p style="color: var(--danger); font-size: 0.8rem; margin-top: 0.35rem;">{{ form.description.errors.0 }}</p>
+                {% endif %}
+            </div>
+            
+            {% if not is_edit %}
+                <div class="form-group">
+                    <label class="form-label" for="id_image">Image Asset <span style="color: var(--primary);">*</span></label>
+                    <input type="file" name="image" id="id_image" class="form-control" required style="padding: 0.6rem;">
+                    {% if form.image.errors %}
+                        <p style="color: var(--danger); font-size: 0.8rem; margin-top: 0.35rem;">{{ form.image.errors.0 }}</p>
+                    {% endif %}
+                </div>
+            {% endif %}
+            
+            <div class="form-group">
+                <label class="form-label" for="id_tags">Tags (Comma-separated)</label>
+                <input type="text" name="tags_input" id="id_tags" value="{{ tag_list|default:"" }}" class="form-control" placeholder="scenic, alpine, memories">
+                <p style="color: var(--text-muted); font-size: 0.75rem; margin-top: 0.4rem;">Separate multiple terms with a comma. They will auto-compile into tag nodes.</p>
+            </div>
+            
+            <div style="display: flex; gap: 1rem; margin-top: 2.5rem;">
+                <a href="{% url 'album_detail' album.id %}" class="btn btn-secondary" style="flex: 1; text-align: center;">Cancel</a>
+                <button type="submit" class="btn btn-primary" style="flex: 2;"><i class="fa-solid fa-cloud-arrow-up"></i> Update Asset</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

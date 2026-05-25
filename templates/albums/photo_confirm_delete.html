@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block title %}AuraGallery - Delete Photo{% endblock %}
+
+{% block content %}
+<div class="auth-page">
+    <div class="auth-card glass" style="border-color: var(--danger); max-width: 500px;">
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <i class="fa-solid fa-circle-exclamation" style="font-size: 3.5rem; color: var(--danger); margin-bottom: 1.5rem; filter: drop-shadow(0 0 10px rgba(239, 68, 68, 0.4));"></i>
+            <h2 style="font-size: 1.8rem; margin-bottom: 0.5rem; color: var(--text-primary);">De-archive Photo?</h2>
+            <p style="color: var(--text-secondary); font-size: 0.95rem; line-height: 1.5;">
+                You are about to delete <strong style="color: var(--text-primary);">"{{ photo.title|default:"Untitled Frame" }}"</strong> from the album <strong style="color: var(--text-primary);">"{{ photo.album.title }}"</strong>. This asset will be permanently erased from Cloudinary storage.
+            </p>
+        </div>
+        
+        <!-- Photo Thumbnail Preview -->
+        <div style="margin: 1.5rem 0; text-align: center; border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05); background: #000; height: 160px; display: flex; align-items: center; justify-content: center;">
+            <img src="{{ photo.image.url }}" alt="Preview" style="max-height: 100%; max-width: 100%; object-fit: contain;">
+        </div>
+        
+        <form method="post">
+            {% csrf_token %}
+            
+            <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                <a href="{% url 'album_detail' photo.album.id %}" class="btn btn-secondary" style="flex: 1; text-align: center;">Cancel</a>
+                <button type="submit" class="btn btn-danger" style="flex: 1.5;"><i class="fa-solid fa-trash"></i> Confirm Deletion</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

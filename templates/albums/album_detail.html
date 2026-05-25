@@ -1,0 +1,246 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}AuraGallery - {{ album.title }}{% endblock %}
+
+{% block content %}
+<!-- Album Information Header -->
+<div class="detail-header glass">
+    <!-- Visual Ambient Glow background decoration -->
+    <div style="position: absolute; top: -100px; right: -100px; width: 300px; height: 300px; background: radial-gradient(circle, var(--primary-glow) 0%, transparent 70%); z-index: 1;"></div>
+    
+    <div class="detail-header-content">
+        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem;">
+            {% if album.category %}
+                <span style="background: var(--primary); color: white; padding: 0.25rem 0.75rem; border-radius: 6px; font-size: 0.8rem; font-weight: 600;">
+                    {{ album.category.name }}
+                </span>
+            {% endif %}
+            {% if album.is_private %}
+                <span class="badge-private" style="position: static; font-size: 0.75rem;"><i class="fa-solid fa-lock"></i> Private Realm</span>
+            {% else %}
+                <span style="background: rgba(6, 182, 212, 0.15); border: 1px solid rgba(6, 182, 212, 0.3); color: var(--accent); padding: 0.25rem 0.75rem; border-radius: 30px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">
+                    <i class="fa-solid fa-earth-americas"></i> Public Realm
+                </span>
+            {% endif %}
+        </div>
+        
+        <h1 style="font-size: 2.8rem; margin-bottom: 1rem; line-height: 1.2;">{{ album.title }}</h1>
+        
+        <p style="color: var(--text-secondary); max-width: 800px; font-size: 1.05rem; margin-bottom: 1.5rem; line-height: 1.7;">
+            {{ album.description|default:"No description provided for this visual gallery." }}
+        </p>
+        
+        <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1.5rem; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 1.5rem;">
+            <div style="display: flex; align-items: center; gap: 1.5rem;">
+                <div class="owner-info">
+                    <span class="owner-avatar" style="width: 36px; height: 36px; font-size: 0.95rem;">{{ album.owner.username|slice:":1"|upper }}</span>
+                    <div>
+                        <p style="font-weight: 700; color: var(--text-primary); line-height: 1.2;">{{ album.owner.username }}</p>
+                        <p style="font-size: 0.75rem; color: var(--text-muted);">Realm Owner</p>
+                    </div>
+                </div>
+                
+                <div style="color: var(--text-secondary); font-size: 0.85rem;">
+                    <p><i class="fa-regular fa-calendar"></i> Established {{ album.created_at|date:"F d, Y" }}</p>
+                    <p><i class="fa-regular fa-images"></i> {{ photos.count }} asset{{ photos.count|pluralize }} archived</p>
+                </div>
+            </div>
+            
+            <!-- Contextual Action Buttons -->
+            <div class="detail-actions">
+                <a href="{% url 'album_list' %}" class="btn btn-secondary"><i class="fa-solid fa-arrow-left"></i> Gallery</a>
+                
+                {% if can_modify %}
+                    <button class="btn btn-primary" onclick="toggleUploadForm()"><i class="fa-solid fa-cloud-arrow-up"></i> Upload Photo</button>
+                    <a href="{% url 'album_update' album.id %}" class="btn btn-secondary"><i class="fa-solid fa-pen-to-square"></i> Settings</a>
+                    <a href="{% url 'album_delete' album.id %}" class="btn btn-danger"><i class="fa-solid fa-trash"></i> Dissolve</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Expandable Premium Photo Upload Form (Inline Glass Panel) -->
+{% if can_modify %}
+<div id="inline-upload-panel" class="glass" style="display: none; padding: 2rem; margin-bottom: 2rem; border-color: var(--primary);">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <h3 style="font-size: 1.5rem; color: var(--text-primary);"><i class="fa-solid fa-image"></i> Archive New Asset</h3>
+        <button onclick="toggleUploadForm()" style="background: none; border: none; color: var(--text-secondary); cursor: pointer; font-size: 1.5rem;"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    
+    <form action="{% url 'photo_create' album.id %}" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+            <div>
+                <div class="form-group">
+                    <label class="form-label" for="id_title">Photo Title</label>
+                    <input type="text" name="title" id="id_title" class="form-control" placeholder="E.g., Whispering Pines at Dusk">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="id_description">Contextual Details / Story</label>
+                    <textarea name="description" id="id_description" class="form-control" placeholder="Describe the scene, environment, or settings..."></textarea>
+                </div>
+            </div>
+            <div>
+                <div class="form-group">
+                    <label class="form-label" for="id_image">Select Image Asset <span style="color: var(--primary);">*</span></label>
+                    <input type="file" name="image" id="id_image" class="form-control" required style="padding: 0.6rem;">
+                    <p style="color: var(--text-muted); font-size: 0.75rem; margin-top: 0.5rem;"><i class="fa-solid fa-cloud"></i> Images are securely stored in Cloudinary cloud servers.</p>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="id_tags">Tags (Comma-separated)</label>
+                    <input type="text" name="tags_input" id="id_tags" class="form-control" placeholder="adventure, scenic, sunset">
+                </div>
+                
+                <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 2rem;">
+                    <button type="button" class="btn btn-secondary" onclick="toggleUploadForm()">Cancel</button>
+                    <button type="submit" class="btn btn-primary"><i class="fa-solid fa-cloud-arrow-up"></i> Upload to Cloud</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+{% endif %}
+
+<!-- Photos Display Section -->
+{% if photos %}
+    <div class="photo-grid">
+        {% for photo in photos %}
+            <div class="photo-card glass glass-interactive" 
+                 onclick="openLightbox('{{ photo.image.url }}', '{{ photo.title|escapejs }}', '{{ photo.description|escapejs }}', '{% for tag in photo.tags.all %}{{ tag.name }}{% if not forloop.last %},{% endif %}{% endfor %}', '{{ photo.id }}')">
+                <img src="{{ photo.image.url }}" alt="{{ photo.title }}" class="photo-img" loading="lazy">
+                
+                <div class="photo-overlay">
+                    <h4 class="photo-title">{{ photo.title|default:"Untitled Frame" }}</h4>
+                    <p style="font-size: 0.75rem; color: var(--text-secondary);"><i class="fa-regular fa-clock"></i> {{ photo.uploaded_at|date:"M d, Y" }}</p>
+                    
+                    {% if photo.tags.exists %}
+                        <div class="photo-tags">
+                            {% for tag in photo.tags.all %}
+                                <span class="tag-badge">{{ tag.name }}</span>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <!-- Empty State -->
+    <div class="glass" style="padding: 5rem; text-align: center; max-width: 600px; margin: 3rem auto;">
+        <i class="fa-solid fa-camera" style="font-size: 4rem; color: var(--primary); margin-bottom: 1.5rem; opacity: 0.5;"></i>
+        <h3 style="font-size: 1.8rem; margin-bottom: 0.5rem;">Album is Empty</h3>
+        <p style="color: var(--text-secondary); margin-bottom: 2rem;">No visual memories have been uploaded to this realm yet.</p>
+        {% if can_modify %}
+            <button class="btn btn-primary" onclick="toggleUploadForm()"><i class="fa-solid fa-cloud-arrow-up"></i> Upload First Photo</button>
+        {% endif %}
+    </div>
+{% endif %}
+
+<!-- Stunning Lightbox View Modal -->
+<div id="lightbox-modal" class="lightbox-modal" onclick="closeLightboxOnOutside(event)">
+    <button class="lightbox-close" onclick="closeLightbox()">&times;</button>
+    
+    <div class="lightbox-content" onclick="event.stopPropagation()">
+        <div class="lightbox-img-wrapper">
+            <img id="lightbox-img" src="" alt="Full Screen Preview" class="lightbox-img">
+        </div>
+        
+        <div class="lightbox-details">
+            <div class="lightbox-info">
+                <h3 id="lightbox-title">Photo Title</h3>
+                <p id="lightbox-desc" style="white-space: pre-wrap;">Photo description goes here. It provides rich context and styling to the entire visual catalog.</p>
+                
+                <div style="margin-top: 1rem;">
+                    <p style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600; margin-bottom: 0.5rem;">KEYWORDS</p>
+                    <div id="lightbox-tags" class="photo-tags">
+                        <!-- Dynamic Tags inject here -->
+                    </div>
+                </div>
+            </div>
+            
+            {% if can_modify %}
+                <div style="display: flex; gap: 0.75rem; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 1.5rem; margin-top: 1.5rem;">
+                    <a id="lightbox-edit-link" href="#" class="btn btn-secondary btn-sm" style="flex: 1;"><i class="fa-solid fa-pen-to-square"></i> Edit Details</a>
+                    <a id="lightbox-delete-link" href="#" class="btn btn-danger btn-sm" style="flex: 1;"><i class="fa-solid fa-trash"></i> Delete Asset</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Toggle Inline Upload Form
+    function toggleUploadForm() {
+        const panel = document.getElementById('inline-upload-panel');
+        if (panel.style.display === 'none' || panel.style.display === '') {
+            panel.style.display = 'block';
+            panel.scrollIntoView({ behavior: 'smooth' });
+        } else {
+            panel.style.display = 'none';
+        }
+    }
+
+    // Lightbox Control Systems
+    const modal = document.getElementById('lightbox-modal');
+    const lImage = document.getElementById('lightbox-img');
+    const lTitle = document.getElementById('lightbox-title');
+    const lDesc = document.getElementById('lightbox-desc');
+    const lTags = document.getElementById('lightbox-tags');
+    const editLink = document.getElementById('lightbox-edit-link');
+    const deleteLink = document.getElementById('lightbox-delete-link');
+
+    function openLightbox(url, title, desc, tagsString, photoId) {
+        lImage.src = url;
+        lTitle.textContent = title || "Untitled Frame";
+        lDesc.textContent = desc || "No description provided for this visual memory.";
+        
+        // Tags Parsing
+        lTags.innerHTML = '';
+        if (tagsString) {
+            const tags = tagsString.split(',');
+            tags.forEach(tag => {
+                const badge = document.createElement('span');
+                badge.className = 'tag-badge';
+                badge.textContent = '#' + tag.trim();
+                lTags.appendChild(badge);
+            });
+        } else {
+            lTags.innerHTML = '<span style="color: var(--text-muted); font-size: 0.8rem;">No tags assigned</span>';
+        }
+        
+        // Configure Action Links
+        if (editLink) {
+            editLink.href = `/photo/${photoId}/update/`;
+        }
+        if (deleteLink) {
+            deleteLink.href = `/photo/${photoId}/delete/`;
+        }
+        
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden'; // Lock scrolling
+    }
+
+    function closeLightbox() {
+        modal.classList.remove('active');
+        document.body.style.overflow = 'auto'; // Restore scrolling
+    }
+
+    function closeLightboxOnOutside(e) {
+        if (e.target === modal) {
+            closeLightbox();
+        }
+    }
+
+    // Escape Key to Close Lightbox
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeLightbox();
+        }
+    });
+</script>
+{% endblock %}

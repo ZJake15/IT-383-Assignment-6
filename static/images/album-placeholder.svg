@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="100%" height="100%">
+  <defs>
+    <linearGradient id="cyber" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8b5cf6" />
+      <stop offset="100%" stop-color="#d946ef" />
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#8b5cf6" stop-opacity="0.15" />
+      <stop offset="100%" stop-color="#0f0f1b" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="100%" height="100%" fill="#0f0f1b" />
+  <rect width="100%" height="100%" fill="url(#glow)" />
+  
+  <!-- Decorative Grid Line Pattern -->
+  <g stroke="rgba(255,255,255,0.02)" stroke-width="1">
+    <line x1="100" y1="0" x2="100" y2="500" />
+    <line x1="200" y1="0" x2="200" y2="500" />
+    <line x1="300" y1="0" x2="300" y2="500" />
+    <line x1="400" y1="0" x2="400" y2="500" />
+    <line x1="500" y1="0" x2="500" y2="500" />
+    <line x1="600" y1="0" x2="600" y2="500" />
+    <line x1="700" y1="0" x2="700" y2="500" />
+    
+    <line x1="0" y1="100" x2="800" y2="100" />
+    <line x1="0" y1="200" x2="800" y2="200" />
+    <line x1="0" y1="300" x2="800" y2="300" />
+    <line x1="0" y1="400" x2="800" y2="400" />
+  </g>
+
+  <!-- Glowing Geometric Lines -->
+  <circle cx="400" cy="250" r="160" stroke="url(#cyber)" stroke-width="1.5" fill="none" opacity="0.25" />
+  <circle cx="400" cy="250" r="120" stroke="url(#cyber)" stroke-width="1" fill="none" opacity="0.15" stroke-dasharray="8 4" />
+  
+  <!-- Outer Floating Rect -->
+  <rect x="250" y="100" width="300" height="300" rx="20" stroke="url(#cyber)" stroke-width="2" fill="none" opacity="0.3" />
+
+  <!-- Photo / Image Icon -->
+  <g transform="translate(360, 200)" stroke="url(#cyber)" stroke-width="3" fill="none" stroke-linejoin="round" stroke-linecap="round">
+    <rect x="0" y="0" width="80" height="60" rx="8" />
+    <circle cx="25" cy="20" r="6" />
+    <path d="M5 52 L30 25 L50 42 L65 30 L75 40" />
+  </g>
+
+  <!-- Typography -->
+  <text x="400" y="320" font-family="'Outfit', sans-serif" font-size="22" font-weight="700" fill="#f8fafc" text-anchor="middle" letter-spacing="1">EMPTY ALBUM</text>
+  <text x="400" y="350" font-family="'Plus Jakarta Sans', sans-serif" font-size="14" fill="#94a3b8" text-anchor="middle" letter-spacing="0.5">Upload photos to display cover image</text>
+</svg>

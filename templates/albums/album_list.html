@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}AuraGallery - Explore Visual Realms{% endblock %}
+
+{% block content %}
+<!-- Premium Dashboard Metrics -->
+<div class="stats-grid">
+    <div class="stat-card glass glass-interactive">
+        <div class="stat-icon"><i class="fa-solid fa-folder-open"></i></div>
+        <div class="stat-info">
+            <h3>{{ total_albums }}</h3>
+            <p>{% if user.is_authenticated and not is_admin %}Your Albums{% else %}Total Albums{% endif %}</p>
+        </div>
+    </div>
+    
+    <div class="stat-card glass glass-interactive">
+        <div class="stat-icon"><i class="fa-solid fa-camera-retro"></i></div>
+        <div class="stat-info">
+            <h3>{{ total_photos }}</h3>
+            <p>{% if user.is_authenticated and not is_admin %}Your Photos{% else %}Total Assets{% endif %}</p>
+        </div>
+    </div>
+    
+    <div class="stat-card glass glass-interactive">
+        <div class="stat-icon"><i class="fa-solid fa-users-gear"></i></div>
+        <div class="stat-info">
+            <h3>{% if user.is_authenticated %}Authorized{% else %}Guest{% endif %}</h3>
+            <p>Identity Tier</p>
+        </div>
+    </div>
+</div>
+
+<!-- Searching & Custom Controls -->
+<div class="grid-header">
+    <div>
+        <h2 style="font-size: 2.2rem; background: linear-gradient(135deg, #f8fafc, #94a3b8); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Curated Photo Albums</h2>
+        <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 0.25rem;">Browse public galleries or create your own protected realms.</p>
+    </div>
+    
+    <div class="filter-bar">
+        <!-- Search bar -->
+        <form method="get" action="{% url 'album_list' %}" style="display: flex; gap: 0.75rem;">
+            {% if selected_category %}
+                <input type="hidden" name="category" value="{{ selected_category }}">
+            {% endif %}
+            <input type="text" name="q" placeholder="Search by title, tags..." value="{{ search_query }}" class="search-input">
+            <button type="submit" class="btn btn-primary"><i class="fa-solid fa-magnifying-glass"></i></button>
+        </form>
+    </div>
+</div>
+
+<!-- Category Filters -->
+<div style="display: flex; gap: 0.75rem; margin-bottom: 2rem; overflow-x: auto; padding-bottom: 0.5rem; scrollbar-width: none;">
+    <a href="{% url 'album_list' %}{% if search_query %}?q={{ search_query }}{% endif %}" 
+       class="btn {% if not selected_category %}btn-primary{% else %}btn-secondary{% endif %} btn-sm" style="border-radius: 30px;">
+        All Realms
+    </a>
+    {% for cat in categories %}
+        <a href="{% url 'album_list' %}?category={{ cat.slug }}{% if search_query %}&q={{ search_query }}{% endif %}" 
+           class="btn {% if selected_category == cat.slug %}btn-primary{% else %}btn-secondary{% endif %} btn-sm" style="border-radius: 30px;">
+            {{ cat.name }}
+        </a>
+    {% endfor %}
+</div>
+
+<!-- Albums Grid -->
+{% if albums %}
+    <div class="album-grid">
+        {% for album in albums %}
+            <div class="album-card glass glass-interactive">
+                <!-- Cover Image -->
+                <div class="album-cover-wrapper">
+                    <img src="{{ album.get_cover_photo_url }}" alt="{{ album.title }}" class="album-cover" loading="lazy">
+                    
+                    {% if album.is_private %}
+                        <span class="badge-private"><i class="fa-solid fa-lock"></i> Private</span>
+                    {% endif %}
+                    
+                    {% if album.category %}
+                        <span class="album-category">{{ album.category.name }}</span>
+                    {% endif %}
+                </div>
+                
+                <!-- Body details -->
+                <div class="album-body">
+                    <div class="album-meta">
+                        <span><i class="fa-regular fa-clock"></i> {{ album.created_at|date:"M d, Y" }}</span>
+                        <span><i class="fa-regular fa-images"></i> {{ album.photos.count }} item{{ album.photos.count|pluralize }}</span>
+                    </div>
+                    
+                    <a href="{% url 'album_detail' album.id %}" class="album-title">{{ album.title }}</a>
+                    <p class="album-desc">{{ album.description|default:"No description provided for this visual realm." }}</p>
+                    
+                    <!-- Footer Info -->
+                    <div class="album-footer">
+                        <div class="owner-info">
+                            <span class="owner-avatar">{{ album.owner.username|slice:":1"|upper }}</span>
+                            <span>{{ album.owner.username }}</span>
+                        </div>
+                        
+                        <a href="{% url 'album_detail' album.id %}" class="btn btn-secondary btn-sm" style="padding: 0.4rem 0.8rem;"><i class="fa-solid fa-eye"></i> View</a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    
+    <!-- Simple Pagination -->
+    {% if is_paginated %}
+        <div style="display: flex; justify-content: center; gap: 1rem; margin-top: 3rem;">
+            {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}" class="btn btn-secondary"><i class="fa-solid fa-chevron-left"></i> Previous</a>
+            {% endif %}
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}" class="btn btn-secondary">Next <i class="fa-solid fa-chevron-right"></i></a>
+            {% endif %}
+        </div>
+    {% endif %}
+
+{% else %}
+    <!-- Empty state -->
+    <div class="glass" style="padding: 4rem; text-align: center; max-width: 600px; margin: 3rem auto;">
+        <i class="fa-solid fa-panorama" style="font-size: 4rem; color: var(--primary); margin-bottom: 1.5rem;"></i>
+        <h3 style="font-size: 1.8rem; margin-bottom: 0.5rem;">No Galleries Found</h3>
+        <p style="color: var(--text-secondary); margin-bottom: 2rem;">No albums match your search filters, or there are no public albums created yet.</p>
+        {% if user.is_authenticated %}
+            <a href="{% url 'album_create' %}" class="btn btn-primary"><i class="fa-solid fa-folder-plus"></i> Launch First Album</a>
+        {% else %}
+            <a href="{% url 'login' %}" class="btn btn-primary"><i class="fa-solid fa-arrow-right-to-bracket"></i> Sign In to Create</a>
+        {% endif %}
+    </div>
+{% endif %}
+{% endblock %}
